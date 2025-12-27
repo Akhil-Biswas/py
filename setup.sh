@@ -114,6 +114,8 @@ if [ -d "./src/project" ]; then
 
     mv "./src/project" "./src/$PROJECT_NAME"
     > README.md
+    rm -rf .git
+    git init
 fi
 
 
