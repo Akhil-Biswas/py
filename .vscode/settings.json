@@ -1,0 +1,23 @@
+{
+    // Indentation (global)
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+
+    // Language-specific overrides
+    "[python]": {
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    },
+    "[json]": {
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    },
+
+    // Formatting & saving
+    "editor.formatOnSave": true,
+    "files.autoSave": "onFocusChange",
+
+    // Brackets
+    "editor.language.colorizedBracketPairs": []
+}

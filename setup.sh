@@ -27,7 +27,37 @@
 # Exit immediately if any command fails
 set -e
 
-echo "===== Python Project Setup ====="
+# -----------------------------------------------------------------------------
+# ANSI color codes
+# -----------------------------------------------------------------------------
+GREEN_BOLD="\033[92;1m"
+RED_BOLD="\033[91;1m"
+CYAN="\033[36m"
+MAGENTA_BOLD="\033[95;1m"
+YELLOW="\033[93m"
+RESET="\033[0m"
+
+echo -e "${GREEN_BOLD}===== Python Project Setup =====${RESET}"
+
+# -----------------------------------------------------------------------------
+# Output helper functions
+# -----------------------------------------------------------------------------
+info() {
+    echo -e "${CYAN}$1${RESET}"
+}
+
+success() {
+    echo -e "${GREEN_BOLD}$1${RESET}"
+}
+
+warn() {
+    echo -e "${YELLOW}$1${RESET}"
+}
+
+error() {
+    echo -e "${RED_BOLD}Error:${RESET} $1"
+}
+
 
 # -----------------------------------------------------------------------------
 # 1. Detect Python executable
@@ -52,10 +82,10 @@ fi
 REQUIRED_PYTHON="3.10"
 CURRENT_PYTHON=$($PYTHON -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 
-echo "Python version detected: $CURRENT_PYTHON"
+info "Python version detected: $CURRENT_PYTHON"
 
 if [ "$(printf '%s\n' "$REQUIRED_PYTHON" "$CURRENT_PYTHON" | sort -V | head -n1)" != "$REQUIRED_PYTHON" ]; then
-    echo "Error: Python $REQUIRED_PYTHON or higher is required."
+    echo -e "\033[1;91mError:\033[0;91;m Python $REQUIRED_PYTHON or higher is required.\033[0m"
     exit 1
 fi
 
@@ -63,17 +93,24 @@ fi
 # 3. Detect or create virtual environment
 #
 # Priority:
-#   1. Use existing `venv/` if present
-#   2. Use existing `.venv/` if present
-#   3. Otherwise, create `.venv/`
+#   1. Existing .venv/
+#   2. Existing venv/
+#   3. Create .venv/
 # -----------------------------------------------------------------------------
 VENV_DIR=".venv"
 
-if [ -d "venv" ]; then
+if [ -d ".venv" ]; then
+    VENV_DIR=".venv"
+    info "Using existing virtual environment in ${MAGENTA_BOLD}.venv${RESET}"
+
+elif [ -d "venv" ]; then
     VENV_DIR="venv"
-elif [ ! -d ".venv" ]; then
-    echo "Creating virtual environment in .venv..."
+    info "Using existing virtual environment in ${MAGENTA_BOLD}venv${RESET}"
+
+else
+    info "Creating virtual environment in ${MAGENTA_BOLD}.venv${RESET}"
     $PYTHON -m venv .venv
+    VENV_DIR=".venv"
 fi
 
 # -----------------------------------------------------------------------------
@@ -94,8 +131,8 @@ fi
 #
 # Safe even when using uv (pip is still used internally)
 # -----------------------------------------------------------------------------
-echo "Upgrading pip..."
-pip install --upgrade pip
+info "Upgrading pip..."
+pip install --upgrade pip &>/dev/null
 
 # -----------------------------------------------------------------------------
 # 6. Install dependencies
@@ -106,21 +143,23 @@ pip install --upgrade pip
 #   3. Fallback: install minimal dependencies
 # -----------------------------------------------------------------------------
 if [ -f "requirements.txt" ]; then
-    echo "Installing dependencies from requirements.txt..."
+    info "Installing dependencies from requirements.txt..."
     pip install -r requirements.txt
 
-elif [ -f "pyproject.toml" ]; then
+else
+    warn "requirements.txt not found."
+fi
+
+if [ -f "pyproject.toml" ]; then
     if ! command -v uv &>/dev/null; then
-        echo "uv not found. Installing uv..."
+        warn "uv not found. Installing uv..."
         pip install uv
     fi
-    echo "Syncing dependencies using uv..."
+    info "Syncing dependencies using uv..."
     uv sync
 
 else
-    echo "No dependency configuration found."
-    echo "Installing minimal required packages..."
-    pip install rich
+    warn "pyproject.toml found."
 fi
 
 # -----------------------------------------------------------------------------
@@ -133,14 +172,14 @@ fi
 # -----------------------------------------------------------------------------
 # 8. Completion message
 # -----------------------------------------------------------------------------
-echo "Setup complete!"
+success "===== Setup complete! ====="
 
 echo "Activate the virtual environment manually with:"
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" || "$OSTYPE" == "cygwin" ]]; then
     echo "  PowerShell: $VENV_DIR\\Scripts\\Activate.ps1"
     echo "  CMD:        $VENV_DIR\\Scripts\\activate.bat"
 else
-    echo "  source $VENV_DIR/bin/activate"
+    echo -e "\033[93m  source $VENV_DIR/bin/activate\033[0m"
 fi
 
 # -----------------------------------------------------------------------------
@@ -148,4 +187,4 @@ fi
 #
 # Uncomment to automatically start the app after setup
 # -----------------------------------------------------------------------------
-# $PYTHON -m src.main
+# $PYTHON -m project
