@@ -22,5 +22,5 @@ git clone https://github.com/Akhil-Biswas/py.git .
 
 ```shell
 chmod +x setup.sh
-setup.sh
+./setup.sh
 ```
