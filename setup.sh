@@ -58,7 +58,6 @@ error() {
     echo -e "${RED_BOLD}Error:${RESET} $1"
 }
 
-
 # -----------------------------------------------------------------------------
 # 1. Detect Python executable
 #
@@ -73,6 +72,51 @@ else
     echo "Error: Python is not installed or not in PATH."
     exit 1
 fi
+
+# ------------------------------------------------------------------------------
+# 2 . Rename project directory if it is named 'project'
+# -----------------------------------------------------------------------------
+if [ -d "./src/project" ]; then
+    DEFAULT_NAME="my-project"
+
+    while true; do
+        read -rp "Enter your project name [default: $DEFAULT_NAME]: " INPUT
+
+        # Empty → default
+        if [ -z "$INPUT" ]; then
+            PROJECT_NAME="$DEFAULT_NAME"
+            break
+        fi
+
+        # Auto-fix:
+        # 1. lowercase
+        # 2. spaces/underscores → hyphen
+        # 3. remove invalid chars
+        # 4. trim leading/trailing hyphens
+        PROJECT_NAME=$(echo "$INPUT" \
+            | tr '[:upper:]' '[:lower:]' \
+            | sed -E 's/[ _]+/-/g; s/[^a-z0-9-]//g; s/^-+|-+$//g')
+
+        # If nothing valid remains, re-ask
+        if [ -z "$PROJECT_NAME" ]; then
+            echo "Invalid project name. Try again."
+            continue
+        fi
+
+        # Prevent overwrite
+        if [ -e "./src/$PROJECT_NAME" ]; then
+            echo "Directory './src/$PROJECT_NAME' already exists."
+            continue
+        fi
+
+        break
+    done
+
+    mv "./src/project" "./src/$PROJECT_NAME"
+    > README.md
+fi
+
+
 
 # -----------------------------------------------------------------------------
 # 2. Check Python version
