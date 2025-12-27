@@ -24,3 +24,19 @@ git clone https://github.com/Akhil-Biswas/py.git .
 chmod +x setup.sh
 ./setup.sh
 ```
+
+### 4. Change remote to your repository
+```shell
+git remote remove origin
+git remote add origin git@github.com:<your-username>/<your-repo>.git
+```
+### 5. Verify
+```shell
+git remote -v
+```
+```output.txt
+# OUTPUT
+origin  git@github.com:<your-username>/<your-repo>.git (fetch)
+origin  git@github.com:<your-username>/<your-repo>.git (push)
+
+```
